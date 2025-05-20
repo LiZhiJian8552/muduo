@@ -13,7 +13,7 @@
         char buf[1024]={0}; \
         snprintf(buf,1024,logmsgFormat,##__VA_ARGS__); \
         Logger.log(buf); \
-    }while(0);
+    }while(0)
 
 #define LOG_ERROR(logmsgFormat,...)  \
     do{\
@@ -22,7 +22,7 @@
         char buf[1024]={0}; \
         snprintf(buf,1024,logmsgFormat,##__VA_ARGS__); \
         Logger.log(buf); \
-    }while(0);
+    }while(0)
 
 #define LOG_FATAL(logmsgFormat,...)  \
     do{\
@@ -31,7 +31,8 @@
         char buf[1024]={0}; \
         snprintf(buf,1024,logmsgFormat,##__VA_ARGS__); \
         Logger.log(buf); \
-    }while(0);
+        exit(-1); \
+    }while(0)
 
 #ifndef MUDEBUG
 #define LOG_DEBUG(logmsgFormat,...)  \
@@ -41,7 +42,7 @@
         char buf[1024]={0}; \
         snprintf(buf,1024,logmsgFormat,##__VA_ARGS__); \
         Logger.log(buf); \
-    }while(0);
+    }while(0)
 #else
     #define LOG_DEBUG(logmsgFormat,...)
 #endif

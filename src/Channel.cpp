@@ -24,7 +24,7 @@ Channel::~Channel(){
 
 }
 
-// TODO 何时调用的
+// TODO 何时调用的，具体含义
 void Channel::tie(const std::shared_ptr<void> &obj){
     tie_=obj;
     tied_=true;
@@ -47,7 +47,7 @@ void Channel::handleEvent(Timestamp receiveTime){
     if(tied_){ //是否之前绑定过 --->啥意思（监听过一个channel？）
         // 将弱指针提升为强指针
         std::shared_ptr<void> guard=tie_.lock();
-        if(guard){
+        if(guard){ //提升成功
             handleEventWithGuard(receiveTime);
         }
     }else{
