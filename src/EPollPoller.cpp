@@ -6,6 +6,7 @@
 #include<errno.h>
 #include <unistd.h>
 #include <cstring>
+#include "EventLoop.h"
 
 
 // 表示当前Channel的状态
