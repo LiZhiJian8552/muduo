@@ -33,7 +33,7 @@ public:
 
         int fd() const{ return fd_;}
         int events()const{return events_;}
-        int set_revents(int revent){revents_=revent;}
+        void set_revents(int revent){revents_=revent;}
 
         bool isNoneEvent()const{return events_==KNoneEvent;}
 
@@ -44,9 +44,9 @@ public:
         void disableAll(){events_=KNoneEvent;update();}
 
         // 返回当前fd的事件状态
-        bool isNoneEvent()const {return events_==KNoneEvent;}
-        bool isWriting()const{return events_==KWriteEvent;}
-        bool isReading()const{return events_==KReadEvent;}
+        bool isNoneEvent() {return events_==KNoneEvent;}
+        bool isWriting(){return events_==KWriteEvent;}
+        bool isReading(){return events_==KReadEvent;}
 
         int index(){return index_;}
         void set_index(int idx){index_=idx;}

@@ -4,6 +4,9 @@
 
 
 #include<errno.h>
+#include <unistd.h>
+#include <cstring>
+
 
 // 表示当前Channel的状态
 const int kNew=-1;      //从未添加过poller
@@ -23,12 +26,12 @@ EPollPoller::EPollPoller(EventLoop *loop)
 }
 
 EPollPoller::~EPollPoller(){
-    ::close(epollfd_);
+    ::close(epollfd_); //close---->头文件 unistd.h
 }
 
 Timestamp EPollPoller::poll(int timeoutMs, ChannelList *activateChannels){
     // 使用LOG_DEBUG更合理
-    LOG_INFO("func=%s => fd total count:%d\n",channels_.size());
+    LOG_INFO("func=%s => fd total count:%lu\n",__FUNCTION__,channels_.size());
 
     int numEvents=::epoll_wait(epollfd_,&*events_.begin(),static_cast<int>(events_.size()),timeoutMs);
     
@@ -72,7 +75,7 @@ void EPollPoller::fillActivateChannels(int numEvents, ChannelList *activateChann
 void EPollPoller::updateChannel(Channel *channel){
     // 获取channel与Poller的状态
     const int index=channel->index();
-    LOG_INFO("func=%s fd=%d events=%d index=%d \n",__FUNCTION__,channel->fd(),channel->events,index);
+    LOG_INFO("func=%s fd=%d events=%d index=%d \n",__FUNCTION__,channel->fd(),channel->events(),index);
 
     if(index==kNew || index==kDeleted){
         if(index==kNew){
