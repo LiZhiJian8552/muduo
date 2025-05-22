@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 #include "../include/noncopyable.h"
 #include "../include/Timestamp.h"
 #include "../include/CurrentThread.h"
@@ -41,7 +41,7 @@ public:
     void removeChannel(Channel* channel);
     void hasChannel(Channel* channel);
 
-    // 判断eventloop对象是否在自己的线程里面 TODO？？？
+    // 判断eventloop对象是否在自己的线程里面 
     bool isInLoopThread()const{return threadId_==CurrentThread::tid();}
 
 private:
@@ -71,7 +71,7 @@ private:
     std::unique_ptr<Channel> wakeupChannel_;
 
     ChannelList activateChannels;
-    Channel* currentActivateChannel_;
+    // Channel* currentActivateChannel_;
 
 
     // 标识当前loop是否有需要执行的回调操作
