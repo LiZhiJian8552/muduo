@@ -18,7 +18,7 @@ public:
     EventLoopThreadPool(EventLoop* baseLoop,const std::string& nameArg);
     ~EventLoopThreadPool();
 
-    void setThreadNUm(int numThreads){numThreads_=numThreads;}
+    void setThreadNum(int numThreads){numThreads_=numThreads;}
 
     void start(const ThreadInitCallback &cb=ThreadInitCallback());
 
@@ -31,15 +31,12 @@ public:
     bool started()const{return started_;}
     const std::string name()const{return name_;}
 private:
-    
 
-
-
-    EventLoop* baseLoop_;           //用户使用的线程
+    EventLoop* baseLoop_;           //用户使用的线程 ---->用户创建的EventLoop loop;
     std::string name_;
     bool started_;
     int numThreads_;
     int next_;                      //轮询下标
     std::vector<std::unique_ptr<EventLoopThread>> threads_;
-    std::vector<EventLoop*> loops_;  //如果numThreads_>1?否则只有baseLoop_还是为空呢
+    std::vector<EventLoop*> loops_;  //如果numThreads_>1?否则只有baseLoop_还是为空呢  -->为空
 };

@@ -10,19 +10,21 @@ EventLoopThreadPool::EventLoopThreadPool(EventLoop *baseLoop, const std::string 
     started_(false),
     numThreads_(0),
     next_(0)
-{
-}
+{}
 
 EventLoopThreadPool::~EventLoopThreadPool(){
-
+    /**
+     * 不需要手动释放loops_中的对象，因为该对象是栈上的资源，能自动释放
+     */ 
 }
 
 void EventLoopThreadPool::start(const ThreadInitCallback &cb){
     started_=true;
 
+    // numThreads_设置的线程数量
     for(int i=0;i<numThreads_;i++){
         char buf[name_.size()+32];
-        snprintf(buf,sizeof buf,name_.c_str(),i);
+        snprintf(buf,sizeof buf,"%s%d",name_.c_str(),i);
         EventLoopThread* t=new EventLoopThread(cb,buf);
         threads_.push_back(std::unique_ptr<EventLoopThread>(t));
         
@@ -30,7 +32,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback &cb){
         loops_.push_back(t->startLoop());
     }
     // 如果未设置numThreads_,整个服务端只有一个线程，运行baseLoop
-    if(numThreads_==0){
+    if(numThreads_==0 && cb){
         cb(baseLoop_);
     }
 }

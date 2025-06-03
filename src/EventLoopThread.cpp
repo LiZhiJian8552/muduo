@@ -7,7 +7,7 @@ EventLoopThread::EventLoopThread(const ThreadInitCallback &cb, const std::string
     thread_(std::bind(&EventLoopThread::threadFunc,this),name),
     mutex_(),   //默认构造
     cond_(),    //默认构造
-    callback_()
+    callback_(cb)
 {
 
 }
