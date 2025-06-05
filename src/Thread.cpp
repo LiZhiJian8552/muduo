@@ -27,7 +27,7 @@ void Thread::start(){
 
     // 定义信号量
     sem_t sem;
-    // 信号量初始化,初始没有资源 false->0?
+    // 信号量初始化,初始没有资源 false->0
     sem_init(&sem,false,0);
 
     // 创建一个子线程，执行该线程函数
