@@ -49,6 +49,11 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "thread": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "executor": "cpp",
+        "internet": "cpp",
+        "socket": "cpp",
+        "timer": "cpp",
+        "future": "cpp"
     }
 }

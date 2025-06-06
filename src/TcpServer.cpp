@@ -2,7 +2,7 @@
 #include"../include/Logger.h"
 
 #include<functional>
-#include "TcpServer.h"
+
 
 // 用户传入的Loop不能为空
 EventLoop* CheckLoopNotNull(EventLoop* loop){
@@ -15,7 +15,7 @@ EventLoop* CheckLoopNotNull(EventLoop* loop){
 TcpServer::TcpServer(EventLoop* loop,
         const InetAddress& listenAddr,
         const std::string& nameArg,
-        Option option=kNoReusePort)
+        Option option)
         :loop_(CheckLoopNotNull(loop)),
         ipPort_(listenAddr.toIpPort()),
         name_(nameArg),
@@ -23,7 +23,7 @@ TcpServer::TcpServer(EventLoop* loop,
         threadPool_(new EventLoopThreadPool(loop,name_)),
         connectionCallback_(),
         messageCallback_(),
-        nextConnId_(1)
+        nextConnId_(1)    //???
 {
     // 当有新用户连接时，会执行TcpServer::newConnection（根据轮询算法选择一个subloop,唤醒subloop,把当前connfd封装成channel分发给subloop）
     acceptor_->setNewConnectionCallback(std::bind(&TcpServer::newConnection,this,std::placeholders::_1,std::placeholders::_2));
@@ -36,7 +36,7 @@ void TcpServer::setThreadNum(int numThreads){
 }
 
 void TcpServer::start() {
-    // 防止一个TcpServer对象被start多次
+    // 防止一个TcpServer对象被start多次(第二次调用start则不为0，不会进入)
     if(started_++==0){
         threadPool_->start(threadInitCallback_);
         // 在baseLoop中启动监听
