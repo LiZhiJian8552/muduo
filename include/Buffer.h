@@ -45,6 +45,52 @@ public:
         }
     }
 
+    // 缓冲区复位
+    void retrieve(size_t len){
+        if(len<readableBytes()){
+            readerIndex_+=len;
+        }else{  //len==readableBytes()
+            retrieveAll();
+        }
+    }
+
+    void retrieveAll(){
+        readerIndex_=kCheapPrepend;
+        writerIndex_=kCheapPrepend;
+    }
+
+    // 把onMessage函数上报的Buffer数据转成string类型的数据返回
+    std::string retrieveAsAllString(){
+        return retrieveAsString(readableBytes());
+    }
+
+     std::string retrieveAsString(size_t len){
+        // 构造一个从peek()位置开始长度为len的string
+        std::string result(peek(),len);
+        retrieve(len);
+        return result;
+    }
+    // 返回可写区域的起始地址
+    char* beginWirte(){
+        return begin()+writerIndex_;
+    }
+    const char* beginWirte()const{
+        return begin()+writerIndex_;
+    }
+
+    // 把[data,data+len]内存上的数据，添加到writeable缓冲区当中
+    void append(const char* data,size_t len){
+        ensureWriteableBytes(len);
+
+        std::copy(data,data+len,beginWirte());
+        writerIndex_+=len;
+    }
+
+    // 从fd上读取数据
+    size_t readFd(int fd,int* saveErrno);
+
+    
+
 private:
     //vector首元素的地址，即数组的起始地址
     char* begin(){
@@ -60,33 +106,7 @@ private:
     const char* peek()const{
         return begin()+readerIndex_;
     }
-
-    // 缓冲区复位
-    void retrieve(size_t len){
-        if(len<readableBytes()){
-            readerIndex_+=len;
-        }else{  //len==readableBytes()
-            retrieveAll();
-        }
-    }
-    
-    void retrieveAll(){
-        readerIndex_=kCheapPrepend;
-        writerIndex_=kCheapPrepend;
-    }
-
-    // 把onMessage函数上报的Buffer数据转成string类型的数据返回
-    std::string retrieveAsAllString(){
-        return retrieveAsString(readableBytes());
-    }
-
-
-    std::string retrieveAsString(size_t len){
-        // 构造一个从peek()位置开始长度为len的string
-        std::string result(peek(),len);
-        retrieve(len);
-        return result;
-    }
+   
 
     // 扩容函数
     void makeSpace(size_t len){
