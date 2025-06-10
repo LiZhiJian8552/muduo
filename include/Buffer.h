@@ -13,9 +13,9 @@
 class Buffer{
 public:
     //记录数据包的长度 
-    static const size_t kCheapPrepend=8;
+    static const ssize_t kCheapPrepend=8;
     // 缓冲区的初始大小
-    static const size_t kInitialSize=1024;
+    static const ssize_t kInitialSize=1024;
 
     explicit Buffer(size_t initialSize=kInitialSize):
             buffer_(kCheapPrepend+initialSize),
@@ -23,12 +23,12 @@ public:
             writerIndex_(kCheapPrepend){}
     
     // 返回可读区域的大小
-    size_t readableBytes()const{
+    ssize_t readableBytes()const{
         return writerIndex_-readerIndex_;
     }
 
     // 返回可写区域的大小
-    size_t writableBytes()const{
+    ssize_t writableBytes()const{
         return buffer_.size()-writerIndex_;
     }
     // 返回记录缓冲区的内容的大小
@@ -87,9 +87,9 @@ public:
     }
 
     // 从fd上读取数据
-    size_t readFd(int fd,int* saveErrno);
-
-    
+    ssize_t readFd(int fd,int* saveErrno);
+    // 通过fd发送数据
+    ssize_t writeFd(int fd,int* saveErrno);
 
 private:
     //vector首元素的地址，即数组的起始地址
@@ -131,7 +131,7 @@ private:
     //缓冲区 
     std::vector<char> buffer_;
     // 数据可读的下标
-    size_t readerIndex_;
+    ssize_t readerIndex_;
     // 数据可写的下标
-    size_t writerIndex_;
+    ssize_t writerIndex_;
 };

@@ -54,6 +54,11 @@
         "internet": "cpp",
         "socket": "cpp",
         "timer": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "buffer": "cpp",
+        "io_context": "cpp",
+        "netfwd": "cpp"
     }
 }
