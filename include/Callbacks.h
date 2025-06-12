@@ -18,4 +18,4 @@ using MessageCallback=std::function<void(const TcpConnectionPtr&,
                                     
 
 
-using HighWaterMarkCallback=std::function<void(const TcpConnectionPtr&,size_t)>;
+using HighWaterMarkCallback=std::function<void(const TcpConnectionPtr&,ssize_t)>;

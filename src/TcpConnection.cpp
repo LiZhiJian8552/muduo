@@ -9,7 +9,7 @@
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<strings.h>
-#include <netinet/tcp.h>
+
 
 static EventLoop* CheckLoopNotNull(EventLoop* loop){
     if(loop==nullptr){
@@ -125,4 +125,86 @@ void TcpConnection::handleError(){
         err=optval;
     }
     LOG_ERROR("TcpConnection::handleError name:%s - SO_ERROR:%d",name_.c_str(),err);
+}
+
+
+/**
+ * 发送数据 应用写的快  而内核发送数据慢，需要把待发送数据写入缓冲区，而且设置了水位回调，防止发送太快
+ */
+void TcpConnection::sendInLoop(const void* data,size_t len){
+    // 已发送的数据大小
+    ssize_t nwrote=0;
+    // 未发送完的数据
+    ssize_t remaining=len;
+    // 记录是否发生错误
+    bool faultError=false;
+
+    // 连接断了则无法发送数据
+    if(state_==kDisconnected){
+        LOG_ERROR("disConnected,give up writing!");
+        return;
+    }
+    // 表示channel_第一次开始写数据，并且缓冲区中没有数据（缓冲区没有数据才可以直接发送参数传入的data）
+    if(!channel_->isWriting()&&outputBuffer_.readableBytes()==0){
+        nwrote=::write(channel_->fd(),data,len);
+        if(nwrote>=0){   //发送成功
+            // 计算剩余要发送的数据大小
+            remaining=len-nwrote;
+            if(remaining==0&&writeCompleteCallback_){   //发送完成并且写回调不为空
+                loop_->runInLoop(
+                    std::bind(writeCompleteCallback_,shared_from_this())
+                );
+            }
+
+        }else{  //发送失败
+            nwrote=0;
+            //EWOULDBLOCK由于非阻塞没有数据
+            if(errno!=EWOULDBLOCK){
+                LOG_ERROR("TcpConnection::sendInLoop");
+                // 收到连接重置的请求
+                if(errno==EPIPE||errno==ECONNRESET){
+                    faultError=true;
+                }
+            }
+        }
+    }
+
+    // 说明当前这次write并未将全部数据发送出去，将剩余的数据保存到缓冲区中
+    // 并且给channel注册EPOLLOUT事件，poller发送tcp的发送缓冲区有空间，会通知相应的sock-channel,调用writeCallback_回调方法
+    // 调用handleWrite方法，把发送缓冲区中的数据全部发送完成
+    if(!faultError&&remaining>0){
+        // 目前发送缓冲区剩余待发送数据的长度
+        ssize_t oldLen=outputBuffer_.readableBytes();
+        // 如果待发送缓冲区中的数据+还未发送的数据之和大于水位线，则
+        if(oldLen+remaining>=highWaterMark_&&oldLen<highWaterMark_&&highWaterMarkCallback_){
+            loop_->queueInLoop(std::bind(
+                highWaterMarkCallback_,
+                shared_from_this(),
+                oldLen+remaining
+            ));
+        }
+        // 将剩余未发送的remaining大小的数据写入缓冲区
+        outputBuffer_.append((char*)data+remaining,remaining);
+        if(!channel_->isWriting()){
+            channel_->enableWriting();
+        }
+    }
+}
+
+
+void TcpConnection::send(const std::string& buf){
+    //Connection依然连接，才发送数据
+    if(state_==kDisconnected){
+        // 判断eventloop对象是否在自己的线程里面
+        if(loop_->isInLoopThread()){
+            sendInLoop(buf.c_str(),buf.size());
+        }else{
+            loop_->runInLoop(std::bind(
+                &TcpConnection::sendInLoop,
+                this,
+                buf.c_str(),
+                buf.size()
+            ));
+        }
+    }
 }

@@ -40,12 +40,6 @@ public:
     bool disconnected()const{return state_==kDisconnected;}
     
 
-
-    // 发送数据
-    void send(const void* message,int len);
-    // 关闭当前连接
-    void shutdown();
-
     void setConnectionCallback(const ConnectionCallback& cb){connectionCallback_=cb;}
     void setMessageCallback(const MessageCallback& cb){messageCallback_=cb;}
     void setWriteCompleteCallback(const WriteCompleteCallback& cb){writeCompleteCallback_=cb;}
@@ -71,8 +65,10 @@ private:
     void sendInLoop(const void* message,size_t len);
     void shutdownInLoop();
 
-
-    
+    // 发送数据
+    void send(const std::string& buf);
+    // 关闭当前连接
+    void shutdown();
 
     EventLoop* loop_;       //这里绝对不是baseloop,因为tcpConnection都是在subloop里面管理的（那如果没有设置threadNum?）
 
@@ -96,8 +92,8 @@ private:
 
     size_t highWaterMark_;
 
-    // 读缓冲区
+    // 接受数据的缓冲区
     Buffer inputBuffer_;
-    // 写缓冲区
+    // 发生数据的缓冲区
     Buffer outputBuffer_;
 };
