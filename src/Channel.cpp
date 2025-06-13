@@ -24,21 +24,20 @@ Channel::~Channel(){
 
 }
 
-// TODO 何时调用的，具体含义
+// 一个TcpConnection新连接创建的时候 TcpConnection =>Channel，为了防止TcpConnection被销毁之后，仍然被使用
 void Channel::tie(const std::shared_ptr<void> &obj){
     tie_=obj;
     tied_=true;
 }
 
 void Channel::remove(){
-    // TODO add code
     // 调用EevntLoop删除当前的Channel
     loop_->removeChannel(this);
 }
 
 // 更新Poller中的channel
 void Channel::update(){
-    //TODO add code
+    //通过channel所属的EventLoop，调用Poller的相应方法，注册fd的events事件
     loop_->updateChannel(this);
 }
 

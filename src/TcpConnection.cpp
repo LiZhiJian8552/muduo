@@ -128,6 +128,54 @@ void TcpConnection::handleError(){
 }
 
 
+// 创建连接时调用
+void TcpConnection::connectEstablished(){
+    setState(kConnected);
+    channel_->tie(shared_from_this());
+    channel_->enableReading();  //向Poller注册channel的epollin事件
+
+    // 新连接建立，调用新连接建立时的回调
+    connectionCallback_(shared_from_this());
+}
+// 销毁连接时调用
+void TcpConnection::connectDestroyed(){
+    if(state_==kConnected){
+        setState(kDisconnected);
+        channel_->disableAll(); //将Channel从Poller中删除，不在监听该Channel
+        connectionCallback_(shared_from_this());
+    }
+    channel_->remove();
+}
+
+
+
+void TcpConnection::send(const std::string& buf){
+    //Connection依然连接，才发送数据
+    if(state_==kDisconnected){
+        // 判断eventloop对象是否在自己的线程里面
+        if(loop_->isInLoopThread()){
+            sendInLoop(buf.c_str(),buf.size());
+        }else{
+            loop_->runInLoop(std::bind(
+                &TcpConnection::sendInLoop,
+                this,
+                buf.c_str(),
+                buf.size()
+            ));
+        }
+    }
+}
+
+void TcpConnection::shutdown(){
+    if(state_==kConnected){
+        setState(kConnecting);
+        loop_->runInLoop(
+            std::bind(&TcpConnection::shutdownInLoop,this)
+        );
+    }
+}
+
+
 /**
  * 发送数据 应用写的快  而内核发送数据慢，需要把待发送数据写入缓冲区，而且设置了水位回调，防止发送太快
  */
@@ -191,20 +239,8 @@ void TcpConnection::sendInLoop(const void* data,size_t len){
     }
 }
 
-
-void TcpConnection::send(const std::string& buf){
-    //Connection依然连接，才发送数据
-    if(state_==kDisconnected){
-        // 判断eventloop对象是否在自己的线程里面
-        if(loop_->isInLoopThread()){
-            sendInLoop(buf.c_str(),buf.size());
-        }else{
-            loop_->runInLoop(std::bind(
-                &TcpConnection::sendInLoop,
-                this,
-                buf.c_str(),
-                buf.size()
-            ));
-        }
+void TcpConnection::shutdownInLoop(){
+    if(!channel_->isWriting()){ //说明outputBuffer中的数据已经全部发送完成
+        socket_->shutdownWrite();       //关闭写端，然后触发EPOLLHUP,然后channel检测到该事件会调用closeCallback_即TcpConnection传入的handleClose
     }
 }

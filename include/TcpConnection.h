@@ -53,6 +53,10 @@ public:
     
     void setState(StateE state){state_=state;}
 
+    // 发送数据
+    void send(const std::string& buf);
+    // 关闭当前连接
+    void shutdown();
 
 private:
     void handleRead(Timestamp receiveTime);
@@ -65,10 +69,7 @@ private:
     void sendInLoop(const void* message,size_t len);
     void shutdownInLoop();
 
-    // 发送数据
-    void send(const std::string& buf);
-    // 关闭当前连接
-    void shutdown();
+   
 
     EventLoop* loop_;       //这里绝对不是baseloop,因为tcpConnection都是在subloop里面管理的（那如果没有设置threadNum?）
 
