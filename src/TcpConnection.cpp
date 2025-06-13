@@ -99,7 +99,7 @@ void TcpConnection::handleWrite(){
         LOG_ERROR("TcpConnection fd=%d is down no more writing \n",channel_->fd());
     }
 }
-
+//Poller-->EPOLLHUP--->channel::closeCallback --->TcpConntion::handleClose
 void TcpConnection::handleClose(){
     LOG_INFO("fd=%d state=%d \n",channel_->fd(),(int)state_);
     setState(kDisconnected);
