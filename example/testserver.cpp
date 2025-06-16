@@ -37,7 +37,7 @@ private:
         std::string msg=buf->retrieveAsAllString();
         conn->send(msg);
         // 关闭写段，触发EPOLLHUP-> closeCallback_
-        conn->shutdown();
+        // conn->shutdown();
     }
     EventLoop* loop_;
     TcpServer server_;
@@ -48,6 +48,6 @@ int main(){
     InetAddress addr(8000);
     EchoServer server(&loop,addr,"");    //创建Acceptor non-blocking listenfd create bind
     server.start(); //listen loopthread listenfd => acceptChannel => mainLoop =>
-    loop.loop();
+    loop.loop();    //开启baseLoop的loop循环
     return 0;
 }

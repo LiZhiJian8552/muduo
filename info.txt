@@ -1,0 +1,6 @@
+调用server.start()的过程中发生了什么？
+    TcpServer.start()---->调用EventLoopThreadPool.start()初始化线程池---->acceptor.listen开始监听是否有新连接到来--->开启loop事件循环
+        (有新链接到来)--->acceptor.handleRead----->创建用于连接的connfd---->TcpServer::newConnection创建一个TcpConnection关联connfd,轮询选择一个loop并将该fd注册到EpollPoller上
+        (向服务器发送数据)--->channel.readCallback(TcpConnection::handleWrite)---->Buffer.readFd读取数据,调用用户传入的onMessageCallbak
+        (向用户发送数据)---->TcpConnection.send--->先尝试write发送数据，如果不能全部发送完成，则将剩余的数据写入OutputBuffer,并向Poller注册EPOLLOUT事件
+        (连接断开)shutdown()--->TcpConnection::shutdownInLoop--->关闭写段，触发EPOLLHUP--->回调Channel的closeCallback_(即TcpConnection::handleClose)--->Channel.disableAll()将channel从Poller中移除--->回调用户传入的onConnectionCallback--->closeCallback_(即TcpServer::removeConnection)-->TcpServer::removeConnectionInLoop

@@ -72,7 +72,9 @@ void TcpConnection::handleRead(Timestamp receiveTime){
     }
 }
 
+// 当需要发送数据无法一次性通过write系统调用发送完成时，会将剩余的数据写入outputBuffer，然后再Poller中注册EPOLLOUT，触发写事件
 void TcpConnection::handleWrite(){
+    
     // outputBuffer中可读部分才是要发送的数据
     if(channel_->isWriting()){
         int saveErrno=0;
