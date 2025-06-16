@@ -1,5 +1,5 @@
-#include"../include/EventLoopThread.h"
-#include "../include/EventLoopThread.h"
+#include"EventLoopThread.h"
+#include "EventLoopThread.h"
 
 EventLoopThread::EventLoopThread(const ThreadInitCallback &cb, const std::string &name)
     :loop_(nullptr),
@@ -13,7 +13,7 @@ EventLoopThread::EventLoopThread(const ThreadInitCallback &cb, const std::string
 }
 
 EventLoopThread::~EventLoopThread(){
-    exiting_=false;
+    exiting_=true;
     // 如果loop不为空，则退出
     if(loop_!=nullptr){
         loop_->quit();
@@ -26,12 +26,12 @@ EventLoopThread::~EventLoopThread(){
 // 启动循环
 EventLoop *EventLoopThread::startLoop(){
     thread_.start();
-    EventLoop* loop;
+    EventLoop* loop=nullptr;
 
     // 使用条件变量，避免startLoop运行结束时，threadFunc还没有运行，没有正确初始化loop对象
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        while(loop==nullptr){
+        while(loop_==nullptr){
             cond_.wait(lock);
         }
         loop=loop_;

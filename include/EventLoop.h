@@ -1,7 +1,7 @@
 #pragma once
-#include "../include/noncopyable.h"
-#include "../include/Timestamp.h"
-#include "../include/CurrentThread.h"
+#include "noncopyable.h"
+#include "Timestamp.h"
+#include "CurrentThread.h"
 
 
 #include<functional>
@@ -45,7 +45,7 @@ public:
     bool isInLoopThread()const{return threadId_==CurrentThread::tid();}
 
 private:
-    void HandleRead();
+    void handleRead();
     // 执行回调
     void doPendingFunctors();
 
@@ -70,7 +70,7 @@ private:
     int wakeupFd_;
     std::unique_ptr<Channel> wakeupChannel_;
 
-    ChannelList activateChannels;
+    ChannelList activateChannels_;
     // Channel* currentActivateChannel_;
 
 

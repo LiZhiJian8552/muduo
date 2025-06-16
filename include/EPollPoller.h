@@ -1,7 +1,7 @@
 #pragma once
 
-#include"../include/Poller.h"
-#include"../include/Timestamp.h"
+#include"Poller.h"
+#include"Timestamp.h"
 
 #include<vector>
 #include<sys/epoll.h>

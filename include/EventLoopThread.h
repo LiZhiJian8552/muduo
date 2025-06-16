@@ -1,7 +1,7 @@
 #pragma once
-#include"../include/noncopyable.h"
-#include "../include/EventLoop.h"
-#include"../include/Thread.h"
+#include"noncopyable.h"
+#include "EventLoop.h"
+#include"Thread.h"
 
 #include<functional>
 #include<mutex>

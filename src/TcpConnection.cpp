@@ -1,8 +1,8 @@
-#include"../include/TcpConnection.h"
-#include "../include/Logger.h"
-#include"../include/Socket.h"
-#include"../include/Channel.h"
-#include"../include/EventLoop.h"
+#include"TcpConnection.h"
+#include "Logger.h"
+#include"Socket.h"
+#include"Channel.h"
+#include"EventLoop.h"
 
 #include<functional>
 #include<errno.h>
@@ -151,7 +151,7 @@ void TcpConnection::connectDestroyed(){
 
 void TcpConnection::send(const std::string& buf){
     //Connection依然连接，才发送数据
-    if(state_==kDisconnected){
+    if(state_==kConnected){  // 修改为 kConnected
         // 判断eventloop对象是否在自己的线程里面
         if(loop_->isInLoopThread()){
             sendInLoop(buf.c_str(),buf.size());

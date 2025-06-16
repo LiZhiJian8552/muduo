@@ -1,6 +1,6 @@
-#include"../include/TcpServer.h"
-#include"../include/Logger.h"
-#include"../include/TcpConnection.h"
+#include"TcpServer.h"
+#include"Logger.h"
+#include"TcpConnection.h"
 
 #include<functional>
 #include<strings.h>
@@ -24,7 +24,8 @@ TcpServer::TcpServer(EventLoop* loop,
         threadPool_(new EventLoopThreadPool(loop,name_)),
         connectionCallback_(),
         messageCallback_(),
-        nextConnId_(1)    //???
+        nextConnId_(1),
+        started_(0)   
 {
     // 当有新用户连接时，会执行TcpServer::newConnection（根据轮询算法选择一个subloop,唤醒subloop,把当前connfd封装成channel分发给subloop）
     acceptor_->setNewConnectionCallback(std::bind(&TcpServer::newConnection,this,std::placeholders::_1,std::placeholders::_2));

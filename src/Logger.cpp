@@ -1,5 +1,5 @@
-#include"../include/Logger.h"
-#include"../include/Timestamp.h"
+#include"Logger.h"
+#include"Timestamp.h"
 #include<iostream>
 
 //获取日志唯一的实例对象 

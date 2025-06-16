@@ -1,7 +1,7 @@
 #pragma
 
-#include "../include/noncopyable.h"
-#include "../include/Timestamp.h"
+#include "noncopyable.h"
+#include "Timestamp.h"
 
 #include<functional>
 #include<memory>
@@ -33,9 +33,7 @@ public:
 
         int fd() const{ return fd_;}
         int events()const{return events_;}
-        void set_revents(int revent){revents_=revent;}
-
-        bool isNoneEvent()const{return events_==KNoneEvent;}
+        void set_revents(int revt){revents_=revt;}
 
         void enableReading(){events_|=KReadEvent;update();}
         void disableReading(){events_&=~KReadEvent;update();}
@@ -44,9 +42,9 @@ public:
         void disableAll(){events_=KNoneEvent;update();}
 
         // 返回当前fd的事件状态
-        bool isNoneEvent() {return events_==KNoneEvent;}
-        bool isWriting(){return events_==KWriteEvent;}
-        bool isReading(){return events_==KReadEvent;}
+        bool isNoneEvent()const {return events_==KNoneEvent;}
+        bool isWriting()const{return events_&KWriteEvent;}
+        bool isReading()const{return events_&KReadEvent;}
 
         int index(){return index_;}
         void set_index(int idx){index_=idx;}

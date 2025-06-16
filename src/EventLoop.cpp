@@ -1,7 +1,7 @@
-#include"../include/EventLoop.h"
-#include"../include/Logger.h"
-#include"../include/Poller.h"
-#include"../include/Channel.h"
+#include"EventLoop.h"
+#include"Logger.h"
+#include"Poller.h"
+#include"Channel.h"
 
 #include<sys/eventfd.h>
 #include<unistd.h>
@@ -44,7 +44,7 @@ EventLoop::EventLoop()
     }
 
     // 设置wakeupfd的事件类型，以及发生事件后的回调操作
-    wakeupChannel_->setReadCallback(std::bind(&EventLoop::HandleRead,this));
+    wakeupChannel_->setReadCallback(std::bind(&EventLoop::handleRead,this));
     // 每一个eventloop都将监听wakeupchannel的EPOLLIN读事件
     wakeupChannel_->enableReading();
 }
@@ -57,7 +57,7 @@ EventLoop::~EventLoop(){
 }
 
 
-void EventLoop::HandleRead(){
+void EventLoop::handleRead(){
     uint64_t one=1;
     ssize_t n=read(wakeupFd_,&one,sizeof(one));
 
@@ -74,12 +74,12 @@ void EventLoop::loop(){
     LOG_INFO("EventLoop %p start looping \n",this);
 
     while(!quit_){
-        activateChannels.clear();
+        activateChannels_.clear();
 
         // Poller监听哪些channel发生了事件，然后上报给EventLoop,通知Channel处理相应的事件
         // 返回epoll_wait的有事件的Channel集合,监听两类fd,一类是client_fd,另一类是wakeupfd_
-        pollReturnTime_=poller_->poll(kPollTimeMs,&activateChannels);
-        for(Channel* channel:activateChannels){
+        pollReturnTime_=poller_->poll(kPollTimeMs,&activateChannels_);
+        for(Channel* channel:activateChannels_){
             channel->handleEvent(pollReturnTime_);
         }
         // 执行当前EventLoop事件循环需要处理的回调操作 
@@ -91,7 +91,7 @@ void EventLoop::loop(){
     }
 
     LOG_INFO("EventLoop %p stop looping. \n",this);
-    looping_=true;
+    looping_=false;
 }
 
  // 退出事件循环, 1.loop在自己的线程中调用quit, 2.在其他线程中调用loop的quit
@@ -141,7 +141,7 @@ void EventLoop::doPendingFunctors(){
         std::unique_lock<std::mutex> lock(mutex_);
         functors.swap(pendingFunctors_); 
     }
-    for(const Functor& functor:functors){
+    for(const Functor& functor :functors){
         functor();
     }
     callingPendingFunctors_=false;

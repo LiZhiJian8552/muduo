@@ -1,5 +1,5 @@
 #pragma once
-#include"../include/noncopyable.h"
+#include"noncopyable.h"
 
 class InetAddress;
 

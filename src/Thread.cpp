@@ -1,5 +1,5 @@
-#include"../include/Thread.h"
-#include"../include/CurrentThread.h"
+#include"Thread.h"
+#include"CurrentThread.h"
 
 #include<semaphore.h>
 
@@ -10,7 +10,7 @@ Thread::Thread(ThreadFunc func, const std::string &name)
     :started_(false),
     joined_(false),
     tid_(0),
-    func_(std::move(func_)),
+    func_(std::move(func)),
     name_(name)
 {
     setDefaultName();
@@ -36,7 +36,6 @@ void Thread::start(){
         tid_=CurrentThread::tid();
 
         sem_post(&sem);
-        // 
         func_();
     }));
 

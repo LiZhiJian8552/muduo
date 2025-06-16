@@ -1,6 +1,6 @@
-#include"../include/Channel.h"
-#include"../include/EventLoop.h"
-#include "../include/Logger.h"
+#include"Channel.h"
+#include"EventLoop.h"
+#include "Logger.h"
 
 #include<sys/epoll.h>
 
@@ -42,11 +42,9 @@ void Channel::update(){
 }
 
 void Channel::handleEvent(Timestamp receiveTime){
-
-    if(tied_){ //是否之前绑定过 --->啥意思（监听过一个channel？）
-        // 将弱指针提升为强指针
+    if(tied_){ 
         std::shared_ptr<void> guard=tie_.lock();
-        if(guard){ //提升成功
+        if(guard){ 
             handleEventWithGuard(receiveTime);
         }
     }else{

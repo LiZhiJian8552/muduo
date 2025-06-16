@@ -1,6 +1,6 @@
-#include "../include/EPollPoller.h"
-#include "../include/Logger.h"
-#include "../include/Channel.h"
+#include "EPollPoller.h"
+#include "Logger.h"
+#include "Channel.h"
 
 
 #include<errno.h>
@@ -33,7 +33,7 @@ EPollPoller::~EPollPoller(){
 Timestamp EPollPoller::poll(int timeoutMs, ChannelList *activateChannels){
     // 使用LOG_DEBUG更合理
     LOG_INFO("func=%s => fd total count:%lu\n",__FUNCTION__,channels_.size());
-
+    
     int numEvents=::epoll_wait(epollfd_,&*events_.begin(),static_cast<int>(events_.size()),timeoutMs);
     
     int savedErrno=errno;
@@ -41,13 +41,16 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList *activateChannels){
     
     if(numEvents>0){
         LOG_INFO("%d events happened \n",numEvents);
+
         fillActivateChannels(numEvents,activateChannels);
+
         // 扩容
         if(numEvents==events_.size()){
             events_.resize(events_.size()*2);
         }
+        
     }else if(numEvents==0){
-        LOG_DEBUG("%s timeout! \n",__FUNCTION__);
+        LOG_DEBUG("%s timeout! \n",__FUNCTION__); 
     }else{
         if(savedErrno!=EINTR){
             errno=savedErrno;
@@ -58,10 +61,15 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList *activateChannels){
 }
 
 void EPollPoller::fillActivateChannels(int numEvents, ChannelList *activateChannels)const{
+
     for(int i=0;i<numEvents;i++){
-         Channel* channel=static_cast<Channel*>(events_[i].data.ptr);
-         channel->set_revents(events_[i].events);
-         activateChannels->push_back(channel);
+       
+        Channel* channel=static_cast<Channel*>(events_[i].data.ptr);
+
+        channel->set_revents(events_[i].events);
+
+        activateChannels->push_back(channel);
+        
     }
 }
 
@@ -77,13 +85,10 @@ void EPollPoller::updateChannel(Channel *channel){
     // 获取channel与Poller的状态
     const int index=channel->index();
     LOG_INFO("func=%s fd=%d events=%d index=%d \n",__FUNCTION__,channel->fd(),channel->events(),index);
-
     if(index==kNew || index==kDeleted){
         if(index==kNew){
             int fd=channel->fd();
             channels_[fd]=channel;
-        }else if(index==kDeleted){
-
         }
         channel->set_index(kAdded);
         update(EPOLL_CTL_ADD,channel);
@@ -117,12 +122,15 @@ void EPollPoller::update(int operation, Channel *channel){
     int fd=channel->fd();
     // epoll 事件
     struct epoll_event event;
-    memset(&event,0,sizeof(event));
-    event.events=channel->events();
-    event.data.ptr=channel;
-    event.data.fd=fd;
+    bzero(&event, sizeof event);
     
-    if(::epoll_ctl(epollfd_,operation,fd,&event)){
+    event.events=channel->events();
+    // 不能颠倒 当先设置ptr再设置fd时，fd的值会覆盖ptr的值，导致之前设置的指针被覆盖！  
+    event.data.fd=fd;
+    event.data.ptr=channel;
+    
+    
+    if(::epoll_ctl(epollfd_,operation,fd,&event)<0){
         if(operation==EPOLL_CTL_DEL){
             LOG_ERROR("epoll_ctl del error:%d\n",errno);
         }else{

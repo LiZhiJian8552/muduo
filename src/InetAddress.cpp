@@ -1,4 +1,4 @@
-#include "../include/InetAddress.h"
+#include "InetAddress.h"
 
 #include<strings.h>
 #include<string.h>
@@ -33,9 +33,9 @@ uint16_t InetAddress::toPort() const{
     return port;
 }
 
-#include<iostream>
-int main(){
-    InetAddress addr(8080);
-    std::cout<<addr.toIpPort()<<std::endl;
-    return 0;
-}
+// #include<iostream>
+// int main(){
+//     InetAddress addr(8080);
+//     std::cout<<addr.toIpPort()<<std::endl;
+//     return 0;
+// }

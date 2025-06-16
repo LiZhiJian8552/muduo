@@ -1,10 +1,12 @@
 #pragma
-#include"../include/noncopyable.h"
-#include"../include/EventLoop.h"
-#include"../include/InetAddress.h"
-#include"../include/Acceptor.h"
-#include"../include/EventLoopThreadPool.h"
-#include"../include/Callbacks.h"
+#include"noncopyable.h"
+#include"EventLoop.h"
+#include"InetAddress.h"
+#include"Acceptor.h"
+#include"EventLoopThreadPool.h"
+#include"Callbacks.h"
+#include"TcpConnection.h"
+#include"Buffer.h"
 
 
 #include<functional>
@@ -63,7 +65,7 @@ private:
     
     std::atomic_int started_;
 
-    // ??
+    // 是一个用于生成唯一连接标识符的原子计数器
     int nextConnId_;
 
     ConnectionMap connections_;                     //保存所有的连接

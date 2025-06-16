@@ -13,9 +13,9 @@
 class Buffer{
 public:
     //记录数据包的长度 
-    static const ssize_t kCheapPrepend=8;
+    static const size_t kCheapPrepend=8;
     // 缓冲区的初始大小
-    static const ssize_t kInitialSize=1024;
+    static const size_t kInitialSize=1024;
 
     explicit Buffer(size_t initialSize=kInitialSize):
             buffer_(kCheapPrepend+initialSize),
@@ -23,12 +23,12 @@ public:
             writerIndex_(kCheapPrepend){}
     
     // 返回可读区域的大小
-    ssize_t readableBytes()const{
+    size_t readableBytes()const{
         return writerIndex_-readerIndex_;
     }
 
     // 返回可写区域的大小
-    ssize_t writableBytes()const{
+    size_t writableBytes()const{
         return buffer_.size()-writerIndex_;
     }
     // 返回记录缓冲区的内容的大小

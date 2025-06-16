@@ -1,8 +1,8 @@
 #pragma once
 
-#include"../include/noncopyable.h"
-#include"../include/Socket.h"
-#include"../include/Channel.h"
+#include"noncopyable.h"
+#include"Socket.h"
+#include"Channel.h"
 
 #include<functional>
 
@@ -11,7 +11,7 @@ class InetAddress;
 
 class Acceptor:noncopyable{
 public:
-    using NewConnectCallback=std::function<void(int,const InetAddress&)>;
+    using NewConnectCallback=std::function<void(int sockfd,const InetAddress&)>;
 
     Acceptor(EventLoop* loop,const InetAddress& listenAddr,bool reuseport);
     ~Acceptor();
